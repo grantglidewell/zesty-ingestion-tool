@@ -1,9 +1,13 @@
-### Zesty.io site ingestion tool
+# Zesty.io site ingestion tool
 
 a tool for ingesting websites into the zesty.io system
 
-## installation
+### installation
+
     npm i
     npm link
+
+### usage
+
     scrape-zesty <url> <dir>
 
