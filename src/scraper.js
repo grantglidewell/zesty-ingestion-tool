@@ -49,6 +49,7 @@ const parseInternalLinks = (list, url) => {
       )
       return acc
     }, [])
+    // get rid of duplicate entries
   const setLinks = new Set(links)
   return Array.from(setLinks)
   // scrape each subsequent
