@@ -1,0 +1,23 @@
+{
+  "name": "zesty-ingestion-tool",
+  "version": "1.0.0",
+  "description": "ingestion tool to bring outside sites into Zesty.io",
+  "main": "index.js",
+  "bin": {
+    "scrape-zesty": "./index.js"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "zesty"
+  ],
+  "author": "Grant Glidewell <grant.glidewell@zesty.io>",
+  "license": "ISC",
+  "dependencies": {
+    "chalk": "^2.4.1",
+    "cheerio": "^1.0.0-rc.2",
+    "commander": "^2.17.1",
+    "node-fetch": "^2.2.0"
+  }
+}
