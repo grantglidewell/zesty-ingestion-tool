@@ -9,10 +9,10 @@ module.exports = function(url, userPath) {
   // flow control
   scrape(url, dir)
     .then(data => {
-      // save the resources
-      // console.log(chalk.red('scrape cheerio return '), data)
+      console.log(chalk.red('scrape cheerio return '), data)
+      // identify resources that are not html (not in links)
       const list = Array.from(data('a'))
-      // const resources = saveResource(parseResources(list, path), path)
+      const links = parseLinks(list, path)
       // determine if there are more links
       // return findInternalLinks(page)s
     })
@@ -24,7 +24,9 @@ const scrape = async (url, dir) => {
   const page = await fetch(url).then(data => {
     return data.text()
   })
-  saveResource(page, dir)
+  // do we want to save the resource for each page
+  // or have a parser sort and then save them>
+  // saveResource(page, dir)
   const $ = cheerio.load(page, {
     withDomLvl1: true,
     normalizeWhitespace: false,
@@ -34,10 +36,15 @@ const scrape = async (url, dir) => {
   return $
 }
 
-const parseResources = (list, dir) => {
+const parseLinks = (list, dir) => {
   // console.log('Args in resources', list, dir)
+  // filter out any outside links
+  list.filter(item => !item.attribs.href.includes('http')).map(item => {
+    console.log(item.attribs)
+  })
   // returns a promise, containg an object with
   // 'dir/filename.css' as a key, and the data as the value
+
 }
 
 const saveResource = (page, dir) => {

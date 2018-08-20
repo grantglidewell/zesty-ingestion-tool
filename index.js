@@ -7,7 +7,7 @@ const chalk = require('chalk')
 const scrape = require('./src/scraper')
 
 program
-  .command('scrape <url> <dir>')
+  // .command('<url> <dir>')
   .option('-u, --URL <s>', 'The URL to start scraping')
   .option('-d, --dir <s>', 'The root directory for fies to be saved')
   .action(function(url, dir) {
