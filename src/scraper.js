@@ -19,7 +19,6 @@ module.exports = function(url, userPath) {
       const links = parseInternalLinks(list, url)
       return sequenceUrlFetch(links, url, dir)
     })
-    .then(console.log)
     .catch(console.error)
 }
 
@@ -30,9 +29,11 @@ const scrape = async opts => {
     opts.FullURL = opts.url
   }
   console.log('scraping ' + chalk.yellow(opts.url))
-  const page = await fetch(opts.FullURL).then(data => {
-    return data.text()
-  })
+  const page = await fetch(opts.FullURL)
+    .then(data => {
+      return data.text()
+    })
+    .catch(err => console.log('fetch err', opts.FullURL))
   saveHTML(page, opts.domain ? `${opts.dir}/${opts.url}` : opts.dir)
   const $ = cheerio.load(page, {
     withDomLvl1: true,
@@ -55,23 +56,39 @@ const parseInternalLinks = list => {
       )
       return acc
     }, [])
+    .filter(link => {
+      // this needs to be more specific and include the current domain
+      if (
+        link.includes('#') ||
+        link.includes('mailto:') ||
+        link.includes('?') ||
+        link.includes('.asp')
+      ) {
+        return false
+      }
+      return true
+    })
   // get rid of duplicate entries
   const setLinks = new Set(links)
   return Array.from(setLinks)
-  // scrape each subsequent
-  // 'dir/filename.css' as a key, and the data as the value
 }
 
 const saveHTML = (page, dir) => {
-  // console.log(chalk.green('args in saveResource'), page, dir)
-  // maybe run this in a try catch?
-  // create non-existant dirs
-  if (fs.existsSync(dir)) {
-    console.log('dir exists')
-    fs.writeFileSync(`${dir}/index.html`, page)
+  //check if dir has a suffix, if not assume index.html
+  if (dir.endsWith('htm') || dir.endsWith('html')) {
+    if (fs.existsSync(dir.substr(0, dir.lastIndexOf('/') + 1))) {
+      fs.writeFileSync(dir, page)
+    } else {
+      fs.mkdirSync(dir.substr(0, dir.lastIndexOf('/') + 1))
+      fs.writeFileSync(dir, page)
+    }
   } else {
-    fs.mkdirSync(dir)
-    fs.writeFileSync(`${dir}/index.html`, page)
+    if (fs.existsSync(dir)) {
+      fs.writeFileSync(dir + '/index.html', page)
+    } else {
+      fs.mkdirSync(dir)
+      fs.writeFileSync(dir + '/index.html', page)
+    }
   }
   console.log(chalk.green(`wrote file to ${dir}`))
   // write resource
@@ -79,11 +96,6 @@ const saveHTML = (page, dir) => {
 
 const sequenceUrlFetch = (urls, domain, dir) => {
   urls.map(url => {
-    return scrape({ domain, url, dir })
+    return scrape({ domain, url, dir }).catch(console.log)
   })
-  // return funcs.reduce(
-  //   (promise, func) =>
-  //     promise.then(result => func().then(Array.prototype.concat.bind(result))),
-  //   Promise.resolve([])
-  // )
 }
