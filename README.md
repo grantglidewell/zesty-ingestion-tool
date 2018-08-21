@@ -14,5 +14,7 @@ a tool for ingesting websites into the zesty.io system
 ## issues
 
 ASP.net 
+
 Angular 
+
 sites with complete urls in links (techcrunch)
