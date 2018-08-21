@@ -7,10 +7,15 @@ const path = require('path')
 // TODO: track files that have been saved already to prevent
 // repeated downloads of resources
 
+const tracking = {
+  resources: new Set([]),
+  html: new Set([])
+}
+
 module.exports = function(url, userPath) {
   const dir = path.resolve(process.cwd(), userPath)
   // flow control
-  // do some validation on the url
+  // TODO: do some validation on the url
   // make sure it has a trailing slash
   scrape({ url, dir })
     .then(data => {
