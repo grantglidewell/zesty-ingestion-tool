@@ -1,5 +1,8 @@
 const cheerio = require('cheerio')
 const fetch = require('node-fetch')
+
+const scrape = require('website-scraper')
+
 const chalk = require('chalk')
 const fs = require('fs')
 const path = require('path')
@@ -27,27 +30,28 @@ module.exports = function(url, userPath) {
     .catch(console.error)
 }
 
-const scrape = async opts => {
-  if (opts.domain) {
-    opts.FullURL = `${opts.domain}${opts.url}`
-  } else {
-    opts.FullURL = opts.url
-  }
-  console.log('scraping ' + chalk.yellow(opts.url))
-  const page = await fetch(opts.FullURL)
-    .then(data => {
-      return data.text()
-    })
-    .catch(err => console.log('fetch err', opts.FullURL))
-  saveHTML(page, opts.domain ? `${opts.dir}/${opts.url}` : opts.dir)
-  const $ = cheerio.load(page, {
-    withDomLvl1: true,
-    normalizeWhitespace: false,
-    xmlMode: true,
-    decodeEntities: true
-  })
-  return $
-}
+// TODO: replace this with scrape from 'website-scraper'
+// const scrape = async opts => {
+//   if (opts.domain) {
+//     opts.FullURL = `${opts.domain}${opts.url}`
+//   } else {
+//     opts.FullURL = opts.url
+//   }
+//   console.log('scraping ' + chalk.yellow(opts.url))
+//   const page = await fetch(opts.FullURL)
+//     .then(data => {
+//       return data.text()
+//     })
+//     .catch(err => console.log('fetch err', opts.FullURL))
+//   saveHTML(page, opts.domain ? `${opts.dir}/${opts.url}` : opts.dir)
+//   const $ = cheerio.load(page, {
+//     withDomLvl1: true,
+//     normalizeWhitespace: false,
+//     xmlMode: true,
+//     decodeEntities: true
+//   })
+//   return $
+// }
 
 const parseInternalLinks = list => {
   // filter out any outside links
