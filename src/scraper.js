@@ -12,15 +12,16 @@ const path = require('path')
 
 const tracking = {
   urls: new Set([]),
+  depth: 0
 }
 
 module.exports = (url, userPath) => {
   const dir = path.resolve(process.cwd(), userPath)
-  let pathArray = url.split( '/' );
-  let protocol = pathArray[0];
-  let host = pathArray[2];
+  const pathArray = url.split( '/' );
+  const protocol = pathArray[0];
+  const host = pathArray[2];
   
-  let options = {
+  const options = {
     urls: [url],
     urlFilter: (urlToCheck)  => {
       if (tracking.urls.has(urlToCheck.split('/').slice(2))) {
@@ -35,7 +36,11 @@ module.exports = (url, userPath) => {
     ignoreErrors: true,
     filenameGenerator: 'bySiteStructure',
     onResourceSaved: (resource) => {
-      console.log(`Saving ${resource}!`)
+      console.log(`Saving ${chalk.green(resource.filename)}`)
+      if(tracking.depth !== resource.depth) {
+        tracking.depth = resource.depth
+        console.log(chalk.yellow(`Scrape depth increased to ${tracking.depth}`))
+      }
       tracking.urls.add(resource.url.split('/').slice(2))
     }
   }
