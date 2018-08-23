@@ -25,10 +25,10 @@ module.exports = (url, userPath) => {
     urls: [url],
     urlFilter: (urlToCheck)  => {
       if (tracking.urls.has(urlToCheck.split('/').slice(2))) {
-        return true
+        return false
       }
       else {
-        return (urlToCheck.indexOf(host) !== -1)
+        return (urlToCheck.includes(host))
       }
     },
     directory: dir,
