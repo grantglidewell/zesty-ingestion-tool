@@ -25,10 +25,10 @@ module.exports = (url, userPath) => {
     urls: [url],
     urlFilter: (urlToCheck)  => {
       if (tracking.urls.has(urlToCheck.split('/').slice(2))) {
-        return true
+        return false
       }
       else {
-        return (urlToCheck.indexOf(host) !== -1)
+        return (urlToCheck.includes(host))
       }
     },
     directory: dir,
@@ -49,4 +49,27 @@ module.exports = (url, userPath) => {
   }).catch((err) => {
     console.error(err)
   })
+}
+
+function extractFromResource(resource) {
+  /*
+    switch over resource type (html/image/js/css/font/etc)
+      image: upload to zesty, store in tracking object so we can refer to the image later in the html
+      js: put in jumbo js file
+      css: put in jumbo css file
+      font: put in jumbo css file
+      etc: other files just ignore for now
+      html: (./tag/# means css class / html tag, html id)
+        use cheerio to look for ./tag/#nav elems -> put in tracking set() -> if filename is returned replace with snippet
+        use cheerio to look for ./tag/#header elems -> put in tracking set() -> if filename is returned replace with snippet
+        use cheerio to look for ./tag/#content elems -> put in tracking set() -> if filename is returned replace with snippet
+        use cheerio to look for ./tag/#content elems -> put in tracking set() -> if filename is returned replace with snippet
+        use cheerio to look for ./tag/#footer elems -> put in tracking set() -> if filename is returned replace with snippet
+  */
+}
+
+function putInTrackingSet(code) {
+  /*
+    see if code exists in tracking already, if hits are above 3 (same snippet 3 times) return the filename of the obj stored in tracking, else create it into tracking / log an additional hit
+  */
 }
