@@ -1,6 +1,6 @@
 const cheerio = require('cheerio')
 const fetch = require('node-fetch')
-
+const Zesty = require('./zesty.js')
 const scrape = require('website-scraper')
 
 const chalk = require('chalk')
@@ -31,6 +31,20 @@ module.exports = (url, userPath) => {
         return (urlToCheck.includes(host))
       }
     },
+    httpResponseHandler: (response) => {
+      if (response.statusCode === 404) {
+        return Promise.reject(new Error('status is 404'))
+      }
+      else {
+        return Promise.resolve({
+          body: response.body,
+          metadata: {
+            headers: response.headers
+          }
+        })
+      }
+    },
+    resourceSaver: Zesty.ResourceSaver,
     directory: dir,
     recursive: true,
     ignoreErrors: true,
@@ -45,31 +59,9 @@ module.exports = (url, userPath) => {
     }
   }
   scrape(options).then((result) => {
-
+    console.log(result)
+    Zesty.resourceScraperFinished(result)
   }).catch((err) => {
     console.error(err)
   })
-}
-
-function extractFromResource(resource) {
-  /*
-    switch over resource type (html/image/js/css/font/etc)
-      image: upload to zesty, store in tracking object so we can refer to the image later in the html
-      js: put in jumbo js file
-      css: put in jumbo css file
-      font: put in jumbo css file
-      etc: other files just ignore for now
-      html: (./tag/# means css class / html tag, html id)
-        use cheerio to look for ./tag/#nav elems -> put in tracking set() -> if filename is returned replace with snippet
-        use cheerio to look for ./tag/#header elems -> put in tracking set() -> if filename is returned replace with snippet
-        use cheerio to look for ./tag/#content elems -> put in tracking set() -> if filename is returned replace with snippet
-        use cheerio to look for ./tag/#content elems -> put in tracking set() -> if filename is returned replace with snippet
-        use cheerio to look for ./tag/#footer elems -> put in tracking set() -> if filename is returned replace with snippet
-  */
-}
-
-function putInTrackingSet(code) {
-  /*
-    see if code exists in tracking already, if hits are above 3 (same snippet 3 times) return the filename of the obj stored in tracking, else create it into tracking / log an additional hit
-  */
 }
