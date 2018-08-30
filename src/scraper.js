@@ -1,6 +1,6 @@
 const cheerio = require('cheerio')
 const fetch = require('node-fetch')
-
+const Zesty = require('./zesty.js')
 const scrape = require('website-scraper')
 
 const chalk = require('chalk')
@@ -31,9 +31,25 @@ module.exports = (url, userPath) => {
         return (urlToCheck.includes(host))
       }
     },
+    resourceSaver: Zesty.ResourceSaver,
     directory: dir,
     recursive: true,
     ignoreErrors: true,
+    httpResponseHandler: (response) => {
+      if (response.statusCode === 404) {
+        return Promise.reject(new Error('status is 404'));
+      } 
+      else {
+        // if you don't need metadata - you can just return Promise.resolve(response.body)
+        return Promise.resolve({
+          body: response.body,
+          metadata: {
+            headers: response.headers,
+            someOtherData: [ 1, 2, 3 ]
+          }
+        })
+      }
+    },
     filenameGenerator: 'bySiteStructure',
     onResourceSaved: (resource) => {
       console.log(`Saving ${chalk.green(resource.filename)}`)
@@ -45,31 +61,62 @@ module.exports = (url, userPath) => {
     }
   }
   scrape(options).then((result) => {
-
+    Zesty.resourceScraperFinished(result, dir)
   }).catch((err) => {
     console.error(err)
   })
 }
+/*
+const cheerio = require('cheerio')
+const fetch = require('node-fetch')
+const Zesty = require('./zesty.js')
+const scrape = require('website-scraper')
+const urlParser = require('url')
+const chalk = require('chalk')
+const fs = require('fs')
+const path = require('path')
 
-function extractFromResource(resource) {
-  /*
-    switch over resource type (html/image/js/css/font/etc)
-      image: upload to zesty, store in tracking object so we can refer to the image later in the html
-      js: put in jumbo js file
-      css: put in jumbo css file
-      font: put in jumbo css file
-      etc: other files just ignore for now
-      html: (./tag/# means css class / html tag, html id)
-        use cheerio to look for ./tag/#nav elems -> put in tracking set() -> if filename is returned replace with snippet
-        use cheerio to look for ./tag/#header elems -> put in tracking set() -> if filename is returned replace with snippet
-        use cheerio to look for ./tag/#content elems -> put in tracking set() -> if filename is returned replace with snippet
-        use cheerio to look for ./tag/#content elems -> put in tracking set() -> if filename is returned replace with snippet
-        use cheerio to look for ./tag/#footer elems -> put in tracking set() -> if filename is returned replace with snippet
-  */
+// TODO: track files that have been saved already to prevent
+// repeated downloads of resources
+
+const tracking = {
+  urls: new Set([]),
+  depth: 0
 }
 
-function putInTrackingSet(code) {
-  /*
-    see if code exists in tracking already, if hits are above 3 (same snippet 3 times) return the filename of the obj stored in tracking, else create it into tracking / log an additional hit
-  */
-}
+module.exports = (url, userPath) => {
+  const dir = path.resolve(process.cwd(), userPath)
+  const pathArray = url.split( '/' );
+  const protocol = pathArray[0];
+  const host = pathArray[2];
+  
+  const options = {
+    urls: [url],
+    urlFilter: (urlToCheck)  => {
+      if (tracking.urls.has(urlParser.parse(urlToCheck).pathname)) {
+        return false
+      }
+      else {
+        return (urlToCheck.includes(host))
+      }
+    },
+    resourceSaver: Zesty.ResourceSaver,
+    directory: dir,
+    recursive: true,
+    ignoreErrors: true,
+    filenameGenerator: 'bySiteStructure',
+    onResourceSaved: (resource) => {
+      console.log(`Saving ${chalk.green(resource.filename)}`)
+      if(tracking.depth !== resource.depth) {
+        tracking.depth = resource.depth
+        console.log(chalk.yellow(`Scrape depth increased to ${tracking.depth}`))
+      }
+      tracking.urls.add(urlParser.parse(resource.url).split('/').slice(2))
+    }
+  }
+  scrape(options).then((result) => {
+    Zesty.resourceScraperFinished(result, dir)
+  }).catch((err) => {
+    console.error(err)
+  })
+}*/

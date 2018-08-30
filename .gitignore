@@ -1,3 +1,4 @@
 node_modules/
 test_scrape/
 .DS_Store
+.vscode/
