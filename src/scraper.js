@@ -1,11 +1,11 @@
 const cheerio = require('cheerio')
 const fetch = require('node-fetch')
-const Zesty = require('./zesty.js')
 const scrape = require('website-scraper')
-
+const analyze = require('./analyze.js')
 const chalk = require('chalk')
 const fs = require('fs')
 const path = require('path')
+const cryptoRandomString = require('crypto-random-string');
 
 // TODO: track files that have been saved already to prevent
 // repeated downloads of resources
@@ -16,7 +16,8 @@ const tracking = {
 }
 
 module.exports = (url, userPath) => {
-  const dir = path.resolve(process.cwd(), userPath)
+  const dir = path.resolve(process.cwd(), `/tmp/tempDir-${cryptoRandomString(4)}`)
+  const outputDir = path.resolve(process.cwd(), userPath)
   const pathArray = url.split( '/' );
   const protocol = pathArray[0];
   const host = pathArray[2];
@@ -31,7 +32,6 @@ module.exports = (url, userPath) => {
         return (urlToCheck.includes(host))
       }
     },
-    resourceSaver: Zesty.ResourceSaver,
     directory: dir,
     recursive: true,
     ignoreErrors: true,
@@ -40,14 +40,7 @@ module.exports = (url, userPath) => {
         return Promise.reject(new Error('status is 404'));
       } 
       else {
-        // if you don't need metadata - you can just return Promise.resolve(response.body)
-        return Promise.resolve({
-          body: response.body,
-          metadata: {
-            headers: response.headers,
-            someOtherData: [ 1, 2, 3 ]
-          }
-        })
+        return Promise.resolve(response.body)
       }
     },
     filenameGenerator: 'bySiteStructure',
@@ -61,7 +54,7 @@ module.exports = (url, userPath) => {
     }
   }
   scrape(options).then((result) => {
-    Zesty.resourceScraperFinished(result, dir)
+    analyze(dir, outputDir)
   }).catch((err) => {
     console.error(err)
   })
