@@ -22,7 +22,7 @@ module.exports = (dir, outputDir) => {
             let content;
             try {
                 content = fs.readFileSync(resource.path);
-
+                resource.path = resource.path.split("/").slice(3).join("/")
                 resource['data'] = content.toString()
                 resource['type'] = mime.getType(resource.path)
 
